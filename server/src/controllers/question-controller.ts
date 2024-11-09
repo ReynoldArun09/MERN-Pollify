@@ -33,3 +33,14 @@ export const GetAllVotes = AsyncHandler(async (req: Request, res: Response) => {
     data: questions,
   });
 });
+
+export const UpdateVote = async (id: string, answer: number) => {
+  const question = await Question.findById(id);
+
+  if (!question) {
+    return null;
+  }
+
+  const updatevote = answer === 0 ? { no: 1 } : { yes: 1 };
+  await Question.updateOne({ _id: id }, { $inc: updatevote });
+};

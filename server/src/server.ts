@@ -7,8 +7,11 @@ import MongoConnection from "./database/mongo-connection";
 import questionRoutes from "./routes/question-route";
 import { ErrorMiddleware } from "./middlewares/error-middleware";
 import { logger } from "./utils";
+import { Server, Socket } from "socket.io";
+import { UpdateVote } from "./controllers/question-controller";
 
 export const app = express();
+const PORT = ParsedEnv.PORT;
 app.use(helmet());
 app.use(
   cors({
@@ -18,11 +21,24 @@ app.use(
 app.use(express.json());
 
 export const server = http.createServer(app);
+const io = new Server(server);
 
-const PORT = ParsedEnv.PORT;
+io.on("connection", (socket: Socket) => {
+  socket.on("answer:input", async (data) => {
+    const parsedData = JSON.parse(data);
+    try {
+      await UpdateVote(parsedData.id, parsedData.answer);
+      socket.emit("answer:output", {
+        id: parsedData.id,
+        answer: parsedData.answer,
+      });
+    } catch (error) {
+      console.log("error");
+    }
+  });
+});
 
 app.use("/api/v1/question", questionRoutes);
-
 app.use(ErrorMiddleware);
 
 MongoConnection();
