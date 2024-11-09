@@ -12,8 +12,9 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
+import { axiosInstance } from "@/axios";
 
 export default function CreatePoll() {
   const [question, setQuestion] = useState("");
@@ -22,10 +23,9 @@ export default function CreatePoll() {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/question/new-vote",
-        { question }
-      );
+      const response = await axiosInstance.post("/api/v1/question/new-vote", {
+        question,
+      });
       if (response) {
         toast.success("New Poll Added.");
         window.location.reload();

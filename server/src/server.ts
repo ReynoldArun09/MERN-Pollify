@@ -21,16 +21,19 @@ app.use(
 app.use(express.json());
 
 export const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
 io.on("connection", (socket: Socket) => {
   socket.on("answer:input", async (data) => {
-    const parsedData = JSON.parse(data);
     try {
-      await UpdateVote(parsedData.id, parsedData.answer);
+      await UpdateVote(data.id, data.answer);
       socket.emit("answer:output", {
-        id: parsedData.id,
-        answer: parsedData.answer,
+        id: data.id,
+        answer: data.answer,
       });
     } catch (error) {
       console.log("error");
